@@ -34,7 +34,7 @@ At its core, this project will be comprised of different *components* that are i
 
 ## Where I am Currently:
 
-- Implemented core functionality in `board.py`, `game.py` , `screen.py` and `run.py`, so a student can as of right now play a chess game. I also have implemented some basic functionality in `opening.py` and have lightly integrated it into the system.
+- Implemented core functionality in `board.py`, `game.py` , `screen.py` and `run.py`, so a student can as of right now play a chess game. I also have implemented some basic functionality in `opening.py` and have lightly integrated it into the system. Also added buttons for features that my friend would like to have in the future. 
 
 - My next steps is to first to fully flesh out `opening.py`, so the flashcard functionality works. After that point, I will then implement the spaced repetition system.
 
