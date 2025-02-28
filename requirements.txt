@@ -1,0 +1,5 @@
+pygtrie
+chess
+pygame
+numpy
+joblib
