@@ -12,12 +12,12 @@ class Board(chess.Board):
     def __call__(self):
         return self
     
-    @property
-    def string_board(self):
+    # @property
+    # def string_board(self):
         
-        strcb = str(self)
-        cb = [line.split() for line in strcb.splitlines()]
-        return cb 
+    #     strcb = str(self)
+    #     cb = [line.split() for line in strcb.splitlines()]
+    #     return cb 
     
-    # def reset(self):
-    #     self.reset()
+    def reset(self):
+        self.reset_board()
