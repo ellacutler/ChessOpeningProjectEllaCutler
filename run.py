@@ -37,18 +37,10 @@ def main():
                 clicked_square = screen_obj.get_clicked_square(mouse_pos)
 
                 if screen_obj.quit_button_rect and screen_obj.quit_button_rect.collidepoint(
-                        mouse_pos):  # check if you're colliding with the quit button
+                        mouse_pos): 
 
                     running = False
                     
-
-                # elif screen_obj.try_again_button_rect and screen_obj.try_again_button_rect.collidepoint(
-                #         mouse_pos):  # check if you're colliding with the buttons
-                #     game.handle_button_click(RatingEnum.AGAIN)
-
-                # elif screen_obj.next_opening_button_rect and screen_obj.next_opening_button_rect.collidepoint(
-                #         mouse_pos):
-                #     game.handle_button_click("Next Opening")
 
                 elif screen_obj.easy_button_rect and screen_obj.easy_button_rect.collidepoint(mouse_pos):
                     game.handle_button_click(RatingEnum.EASY)
@@ -64,28 +56,10 @@ def main():
 
                 else:
                     screen_obj.show_options = False
-                    # screen_obj.draw(board, game.opening, game)  # Moved this line here!
 
                     if clicked_square:
-                        game.manage_current_user_move(clicked_square)  # if not colliding, then run the normal code
+                        game.manage_current_user_move(clicked_square)  
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_n:  # 'n' for next opening
-                    # current_opening_index = (current_opening_index + 1) % len(openings_list)
-                    # game.board.reset()
-                    # game.load_opening(openings_list[current_opening_index])
-                    # game.opening.reset_current_index()
-                    # print(f"Loaded next opening: {game.opening.sequence}")
-                    pass
-                if event.key == pygame.K_p:  # 'p' for previous
-                    pass
-                    # current_opening_index = (current_opening_index - 1) % len(openings_list)
-                    # game.board.reset()
-                    # game.load_opening(openings_list[current_opening_index].sequence, end=openings_list[current_opening_index].end)
-                    # game.opening.reset_current_index()
-                    # print(f"Loaded next opening: {game.opening.sequence}")
-
-        # screen_obj.draw(game.board, game.opening, game)
 
 
         pygame.display.flip()

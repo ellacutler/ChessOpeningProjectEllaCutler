@@ -114,10 +114,20 @@ class Opening():
         with open(filepath, "w") as f:
             f.write(str(self._board.variation_san(self.moves)))
     def make_move(self, move: Move):
+        """
+        Makes move onto internal board state for opening
+        """
         self._board.push(move.chess_move)
     def add_move_to_sequence(self, move):
+        """
+        Adds move to list of moves maintained by object
+        Used when initializing openings
+        """
         self.moves.append(move)
     def reset_current_index(self):
+        """
+        Resets the opening move number of the opening card to zero, and resets the internal board state
+        """
         self.current_move_index = 0
         self._board.reset()
     
@@ -128,6 +138,8 @@ class Opening():
 class OpeningSet():
     """
     container class for opening sequences
+    Includes information about each Opening (list of Openings)
+    and the scheduler that relates cards to a "due date" (scheduler)
     """
 
     def __init__(self):
@@ -136,6 +148,9 @@ class OpeningSet():
 
         
     def load_data(self):
+        """
+        Attempts to load data from file. Otherwise, instantiates list of openings with default due dates.
+        """
         try:
             # loaded in data also has card structure and card data (openings)
             loaded_data = joblib.load(USER_DATA_FILE)
@@ -157,11 +172,16 @@ class OpeningSet():
 
     
     def __call__(self):
+        """
+        Returns list created from generator of cards due in the session.
+        Used in `game.py` to find new openings to load. 
+        """
         return list(self.get_due_this_session())
     
     def get_due_this_session(self):
         """
-        returns generator all cards (managed by `scheduler`) that are due this working session
+        Returns generator all cards (managed by `scheduler`) that are due this working session
+        Changes throughout the working session as cards are reviewed.
         """
         for item in self.items:
              if item.get_due_date() <= datetime.datetime.now(pytz.utc):

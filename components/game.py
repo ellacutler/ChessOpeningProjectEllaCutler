@@ -18,7 +18,6 @@ class Game():
     def __init__(self, board: chess.Board, screen: Screen):
         self.board : chess.Board = board
         self.curr_move = []     
-        self.practice_mode = False   
         self.screen = screen
         self.num_correct = 0 
         self.current_opening_index = 0
@@ -33,6 +32,9 @@ class Game():
         
     
     def handle_button_click(self, button_type:RatingEnum):
+        """
+        After a user selects a rating for their opening ("Try again", "easy", "hard", etc.), manages game state with new opening.
+        """
         assert type(button_type) is RatingEnum
 
         self.opening.set_due_date(button_type)
@@ -57,11 +59,17 @@ class Game():
     
     
     def save_cards_data(self):
+        """
+        After user selects "quit", saves practice state data to file. 
+        """
         joblib.dump(self.openings_list, "openings_data.joblib")
         print("Saved opening data to `openings_data.joblib`")
     
     # need a posn -> move thing here 
     def load_opening(self, opening:Opening):
+        """
+        Loads the next opening in the practice sequence into the game, and resets the game state board. 
+        """
         print(f'Loading opening, ${opening.sequence}')
         self.opening = opening
         self.opening.reset_current_index()
@@ -125,6 +133,9 @@ class Game():
             print("Congrats! You have studied all openings for today.")
         
     def load_next_opening(self):
+        """
+        Identifies the next opening in the practice sequence
+        """
         self.reset_opening_state()
         # load new opening here 
         # self.current_opening_index += 1 # i suspect this can and will cause problems 
@@ -152,21 +163,24 @@ class Game():
         """
         makes user move 
         """
-        if self.practice_mode:
-            is_correct = self.opening.check_move(move)
-            if is_correct:
-                 self.opening.move_forward()
-                 if self.board.is_legal(move.chess_move): 
+        is_correct = self.opening.check_move(move)
+        if is_correct:
+                self.opening.move_forward()
+                if self.board.is_legal(move.chess_move): 
                     # self.opening.move_forward()
                     move.execute(self.board)
                     self.screen.draw(self.board, self.opening, self)
                     return True
-                 else:
+                else:
                     return False
-            else:
-                return False
+        else:
+            return False
     
-    def make_trainer_move(self):
+    def make_trainer_move(self) -> None:
+        """
+        Makes the next move in the sequence, from the chess bot
+        Waits in between rendering to simulate actual play
+        """
         next_move = self.opening.get_next_move()
         if next_move:
             
@@ -174,33 +188,17 @@ class Game():
                 
                 self.opening.move_forward()
                 self.screen.draw(self.board, self.opening, self)
-                time.sleep(0.75) # not sure 
+                time.sleep(0.75) 
                 
                 next_move.execute(self.board)
                 self.screen.draw(self.board, self.opening, self)
         
         
-
     def next_move(self):
+        """
+        Iterates the opening forward by 1 move.
+        """
         self.opening.move_forward()
 
-    def prev_move(self):
-        self.opening.move_backward()
-    def start_practice(self):
-        self.practice_mode = True
-    def change_mode(self):
-        self.practice_mode = not self.practice_mode
-    def add_move_to_sequence(self, move):
-        self.opening.add_move_to_sequence(move)
-    def save_opening(self, filepath):
-        self.opening.save_pgn(filepath)
-    @property
-    def pieces(self):
-        #returns the pieces for the current board
-        pieces = []
-        for square in chess.SQUARES:
-            piece = self.board.piece_at(square)
-            if piece:
-                pieces.append(piece)
-        return pieces
-        
+
+
