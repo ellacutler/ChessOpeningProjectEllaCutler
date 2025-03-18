@@ -1,25 +1,51 @@
 from components.move import Move 
+from fsrs import Card, Scheduler, Rating
 import chess 
 import joblib
+import datetime
+from typing import List
+from components.rating_enum import RatingEnum  # Import RatingEnum
+import pytz 
+
+
+DEFAULT_OPENINGS_FILE = "openings.joblib"
+USER_DATA_FILE = "openings_data.joblib"
 
 
 class Opening():
-    def __init__(self,sequence:str, end: chess.WHITE | chess.BLACK):
+    def __init__(self,sequence:str, end: chess.WHITE | chess.BLACK, scheduler: Scheduler):
+        self.card = Card()
+        self.scheduler = scheduler # pass in from opening set 
         self.sequence = sequence
-        # will also want to add review date functionality here 
         self.current_move_index = 0
         self._board = chess.Board()
-        
         self.moves = self.convert_to_moves(sequence.split("/"))
-
         self.end = end
+        
+    def get_due_date(self) -> datetime:
+        """
+        getter for due date of card associated with opening
+        """
+        return self.card.due
     
+    
+    def set_due_date(self, rating_enum: RatingEnum):
+        """
+        setter of due date associated with opening, 
+        called after an opening is completed correctly or incorrectly
+        also sets other internal card data (such as card history)
+        """
+        print(f'Setting Due Date for ${self.sequence}')
+        card, review_log = self.scheduler.review_card(self.card, rating_enum.value[1])
+        self.card = card
+        
     
     
     
     def convert_to_moves(self, move_strings):
         """
-        Converts a list of move strings into move objects
+        Converts a list of move strings (ie, "e4") into 
+        move objects with reference to preceding moves 
         """
         moves = []
         for move_string in move_strings[1:]: #start at 1 to skip the name of the sequence
@@ -45,7 +71,6 @@ class Opening():
     
     def get_next_move(self):
         """
-        
         returns next move in the opening sequence
         """
         if self.current_move_index < len(self.moves):
@@ -82,6 +107,9 @@ class Opening():
         """
         return self._board
 
+    
+
+
     def save_pgn(self, filepath):
         with open(filepath, "w") as f:
             f.write(str(self._board.variation_san(self.moves)))
@@ -101,26 +129,50 @@ class OpeningSet():
     """
     container class for opening sequences
     """
+
     def __init__(self):
+        self.load_data()
+
 
         
-        self.items = self.convert_to_openings(joblib.load("./openings.joblib"))
-        print("here")
-        
-    def __iter__(self):
-        return self
+    def load_data(self):
+        try:
+            # loaded in data also has card structure and card data (openings)
+            loaded_data = joblib.load(USER_DATA_FILE)
+            self.items = loaded_data.items
+            self.scheduler = loaded_data.scheduler
+        except:
+            self.scheduler = Scheduler()
+            f:List[str] = joblib.load(DEFAULT_OPENINGS_FILE)
+            self.items: List[Opening] = self.convert_to_openings(openings_list=f)
+            
+            
     
-    def __next__(self):
-        pass
+    def __iter__(self):
+        """
+        returns iterator of cards that are due in current gameplay session
+        """
+        return iter(self.get_due_this_session())
+    
+
     
     def __call__(self):
-        return self.items
+        return list(self.get_due_this_session())
     
-    def convert_to_openings(self, openings_list:list):
+    def get_due_this_session(self):
+        """
+        returns generator all cards (managed by `scheduler`) that are due this working session
+        """
+        for item in self.items:
+             if item.get_due_date() <= datetime.datetime.now(pytz.utc):
+                yield item
+            
+         
         
+    def convert_to_openings(self, openings_list:list) -> list:
         
         """
-        Converts the pygtrie paths to a list of opening sequences (lists of moves).
+        Converts list of string sequences into an opening, returns `list` object
 
         Returns:
             list: A list where each element is a list of move strings.
@@ -132,15 +184,18 @@ class OpeningSet():
         return opening_sequences
     
     def make_opening(self, sequence_info:str) -> Opening:
+        """
+        from a string defining an opening, creates "Opening" object
+        translation between string defining opening and 
+        internal "Opening" object handled in "Opening" class
+        """
         
         def get_ending():
             sequence_length = len(sequence_info.split("/"))
             return chess.WHITE if sequence_length % 2 == 0 else chess.BLACK
 
-            pass
+
         
-        return Opening(sequence_info, get_ending())
-        
-        print("here")
-        pass 
+        return Opening(sequence_info, get_ending(), self.scheduler)
+
 

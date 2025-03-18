@@ -4,7 +4,7 @@ from components.move import Move
 from components.opening import Opening, OpeningSet
 from components.board import Board
 from components.game import Game
-from components.screen import Screen  # Import Screen
+from components.screen import Screen  
 
 
 class TestMove(unittest.TestCase):
